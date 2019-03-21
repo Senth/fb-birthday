@@ -11,8 +11,11 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
 import sys
 import time
+import random
 
 import config
+
+random.seed(time.time())
 
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument('--no-sandbox')
@@ -61,16 +64,30 @@ def printRaw(text):
     text = text + '\n'
     sys.stdout.buffer.write(text.encode('utf8'))
 
+def get_message(full_name):
+    message = config.messages[full_name]
+
+    # Replace with a default message
+    if message in config.default_messages:
+        default_messages = config.default_messages[message]
+        
+        # Randomize message
+        message = default_messages[random.randrange(len(default_messages))]
+
+        # Replace $ with name
+        first_name = full_name.split(' ', maxsplit=1)[0]
+        message = message.replace('$', first_name)
+
+    return message
+
 for person in birthday_people:
     # Get name
     name_element = person.find_element_by_xpath(".//div[@class = '" + name_css_class + "']")
     full_name = name_element.text
-    first_name = full_name.split(' ', maxsplit=1)[0]
-    print ('First name: ' + first_name)
 
     # Get birthday wish and post
     if full_name in config.messages:
-        message = config.messages[full_name]
+        message = get_message(full_name)
 
         printRaw(message)
 
