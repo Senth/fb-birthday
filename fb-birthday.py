@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
+import sys
 import time
 
 import config
@@ -17,13 +18,14 @@ chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument('--no-sandbox')
 chrome_options.add_argument('--disable-dev-shm-usage')
 chrome_options.add_argument('--headless')
+chrome_options.add_argument('--lang=en-us')
   
 prefs = {"profile.default_content_setting_values.notifications": 2} 
 chrome_options.add_experimental_option("prefs", prefs) 
 browser = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver", chrome_options=chrome_options) 
   
 # open facebook.com using get() method 
-browser.get('https://mobile.facebook.com/')
+browser.get('https://mbasic.facebook.com/')
 
 # user_name or e-mail id 
 username = "senth.wallace@gmail.com"
@@ -35,21 +37,45 @@ element[0].send_keys(username)
   
 print("Username Entered") 
   
-element = browser.find_element_by_xpath('//*[@id ="m_login_password"]') 
+element = browser.find_element_by_xpath('//*[@name ="pass"]') 
 element.send_keys(config.password) 
   
 print("Password Entered") 
   
 # logging in 
-log_in = browser.find_elements_by_id('u_0_5') 
+log_in = browser.find_elements_by_xpath('//*[@name ="login"]') 
 log_in[0].click() 
   
 print("Login Successfull") 
   
-browser.get('https://mobile.facebook.com/events/birthdays/')
+browser.get('https://mbasic.facebook.com/events/birthdays/')
 
+birthday_article_title = 'Recent Birthdays'
+birthday_people_css_class = 'bk bv'
+name_css_class = 'bx by bs'
 
-# feed = 'Happy Birthday !'
+birthday_article = browser.find_element_by_xpath(".//div[@title ='" + birthday_article_title + "']")
+birthday_people = browser.find_elements_by_xpath(".//div[@class ='" + birthday_people_css_class + "']")
+
+def printRaw(text):
+    text = text + '\n'
+    sys.stdout.buffer.write(text.encode('utf8'))
+
+for person in birthday_people:
+    # Get name
+    name_element = person.find_element_by_xpath(".//div[@class = '" + name_css_class + "']")
+    full_name = name_element.text
+    first_name = full_name.split(' ', maxsplit=1)[0]
+    print ('First name: ' + first_name)
+
+    # Get birthday wish and post
+    if full_name in config.messages:
+        message = config.messages[full_name]
+
+        printRaw(message)
+
+        # Get input element to post
+
 #   
 # element = browser.find_elements_by_xpath("//*[@class ='enter_submit\ 
 #        uiTextareaNoResize uiTextareaAutogrow uiStreamInlineTextarea\ 
