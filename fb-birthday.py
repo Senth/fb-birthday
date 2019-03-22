@@ -3,13 +3,8 @@
 # Mostly copied from https://www.geeksforgeeks.org/python-automating-happy-birthday-post-on-facebook-using-selenium/
 
 from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import ElementNotInteractableException
+from selenium.common.exceptions import ElementNotVisibleException
 import sys
 import time
 import random
@@ -26,7 +21,7 @@ chrome_options.add_argument('--lang=en-us')
   
 prefs = {"profile.default_content_setting_values.notifications": 2} 
 chrome_options.add_experimental_option("prefs", prefs) 
-browser = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver", chrome_options=chrome_options) 
+browser = webdriver.Chrome("/usr/bin/chromedriver", chrome_options=chrome_options) 
   
 # open facebook.com using get() method 
 browser.get('https://mbasic.facebook.com/')
@@ -99,7 +94,7 @@ for person in birthday_people:
             print(message)
 
             time.sleep(5)
-        except ElementNotInteractableException:
+        except (ElementNotInteractableException, ElementNotVisibleException):
             print('Already posted a wish for ' + full_name)
 
 # Close the browser 
