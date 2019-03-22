@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import ElementNotInteractableException
 import sys
 import time
 import random
@@ -32,9 +33,7 @@ browser.get('https://mbasic.facebook.com/')
 
 # user_name or e-mail id 
 username = "senth.wallace@gmail.com"
-  
-print("Let's Begin") 
-  
+
 element = browser.find_elements_by_xpath('//*[@id ="m_login_email"]') 
 element[0].send_keys(username) 
   
@@ -53,12 +52,12 @@ print("Login Successfull")
   
 browser.get('https://mbasic.facebook.com/events/birthdays/')
 
-birthday_article_title = 'Recent Birthdays'
+birthday_article_title = "Today's Birthdays"
 birthday_people_css_class = 'bk bv'
 name_css_class = 'bx by bs'
 
-birthday_article = browser.find_element_by_xpath(".//div[@title ='" + birthday_article_title + "']")
-birthday_people = browser.find_elements_by_xpath(".//div[@class ='" + birthday_people_css_class + "']")
+birthday_article = browser.find_element_by_xpath('.//div[@title ="' + birthday_article_title + '"]')
+birthday_people = browser.find_elements_by_xpath('.//div[@class ="' + birthday_people_css_class + '"]')
 
 def printRaw(text):
     text = text + '\n'
@@ -89,25 +88,19 @@ for person in birthday_people:
     if full_name in config.messages:
         message = get_message(full_name)
 
-        printRaw(message)
+        try:
+            # Get text box
+            textarea = person.find_element_by_tag_name('textarea')
+            textarea.send_keys(message)
 
-        # Get input element to post
+            # Post
+            post_button = person.find_element_by_xpath('.//input[@value="Post"]')
+            post_button.submit()
+            print(message)
 
-#   
-# element = browser.find_elements_by_xpath("//*[@class ='enter_submit\ 
-#        uiTextareaNoResize uiTextareaAutogrow uiStreamInlineTextarea\ 
-#                   inlineReplyTextArea mentionsTextarea textInput']") 
-#   
-# cnt = 0
-#   
-# for el in element: 
-#     cnt += 1
-#     element_id = str(el.get_attribute('id')) 
-#     XPATH = '//*[@id ="' + element_id + '"]'
-#     post_field = browser.find_element_by_xpath(XPATH) 
-#     post_field.send_keys(feed) 
-#     post_field.send_keys(Keys.RETURN) 
-#     print("Birthday Wish posted for friend" + str(cnt)) 
-  
+            time.sleep(5)
+        except ElementNotInteractableException:
+            print('Already posted a wish for ' + full_name)
+
 # Close the browser 
 browser.quit()
