@@ -5,6 +5,7 @@
 from selenium import webdriver
 from selenium.common.exceptions import ElementNotInteractableException
 from selenium.common.exceptions import ElementNotVisibleException
+from selenium.common.exceptions import NoSuchElementException
 import sys
 import time
 import random
@@ -51,51 +52,54 @@ birthday_article_title = "Today's Birthdays"
 birthday_people_css_class = 'bk bv'
 name_css_class = 'bx by bs'
 
-birthday_article = browser.find_element_by_xpath('.//div[@title ="' + birthday_article_title + '"]')
-birthday_people = browser.find_elements_by_xpath('.//div[@class ="' + birthday_people_css_class + '"]')
+try:
+    birthday_article = browser.find_element_by_xpath('.//div[@title ="' + birthday_article_title + '"]')
+    birthday_people = browser.find_elements_by_xpath('.//div[@class ="' + birthday_people_css_class + '"]')
 
-def printRaw(text):
-    text = text + '\n'
-    sys.stdout.buffer.write(text.encode('utf8'))
+    def printRaw(text):
+        text = text + '\n'
+        sys.stdout.buffer.write(text.encode('utf8'))
 
-def get_message(full_name):
-    message = config.messages[full_name]
+    def get_message(full_name):
+        message = config.messages[full_name]
 
-    # Replace with a default message
-    if message in config.default_messages:
-        default_messages = config.default_messages[message]
-        
-        # Randomize message
-        message = default_messages[random.randrange(len(default_messages))]
+        # Replace with a default message
+        if message in config.default_messages:
+            default_messages = config.default_messages[message]
+            
+            # Randomize message
+            message = default_messages[random.randrange(len(default_messages))]
 
-        # Replace $ with name
-        first_name = full_name.split(' ', maxsplit=1)[0]
-        message = message.replace('$', first_name)
+            # Replace $ with name
+            first_name = full_name.split(' ', maxsplit=1)[0]
+            message = message.replace('$', first_name)
 
-    return message
+        return message
 
-for person in birthday_people:
-    # Get name
-    name_element = person.find_element_by_xpath(".//div[@class = '" + name_css_class + "']")
-    full_name = name_element.text
+    for person in birthday_people:
+        # Get name
+        name_element = person.find_element_by_xpath(".//div[@class = '" + name_css_class + "']")
+        full_name = name_element.text
 
-    # Get birthday wish and post
-    if full_name in config.messages:
-        message = get_message(full_name)
+        # Get birthday wish and post
+        if full_name in config.messages:
+            message = get_message(full_name)
 
-        try:
-            # Get text box
-            textarea = person.find_element_by_tag_name('textarea')
-            textarea.send_keys(message)
+            try:
+                # Get text box
+                textarea = person.find_element_by_tag_name('textarea')
+                textarea.send_keys(message)
 
-            # Post
-            post_button = person.find_element_by_xpath('.//input[@value="Post"]')
-            post_button.submit()
-            print(message)
+                # Post
+                post_button = person.find_element_by_xpath('.//input[@value="Post"]')
+                post_button.submit()
+                print(message)
 
-            time.sleep(5)
-        except (ElementNotInteractableException, ElementNotVisibleException):
-            print('Already posted a wish for ' + full_name)
+                time.sleep(5)
+            except (ElementNotInteractableException, ElementNotVisibleException):
+                print('Already posted a wish for ' + full_name)
+except NoSuchElementException:
+    print('No birthdays today :)')
 
 # Close the browser 
 browser.quit()
