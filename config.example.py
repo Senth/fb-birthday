@@ -1,3 +1,4 @@
+email = 'your@email.com'
 password = 'yourpassword'
 
 # $ is replaced with the first name of the person
